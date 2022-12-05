@@ -36,8 +36,7 @@ last = moves
   |>List.replace_at(source-1, source_data ++ Enum.reverse(change))
 end)
 |>Enum.map(&(List.last(&1)))
-|>Enum.reduce("", &(&1 <> &2))
-|>String.reverse()
+|>Enum.reduce("", &(&2 <> &1))
 
 last2 = moves
 |>Enum.reduce(storage, fn move,acc ->
@@ -49,8 +48,7 @@ last2 = moves
   |>List.replace_at(source-1, source_data ++ change)
 end)
 |>Enum.map(&(List.last(&1)))
-|>Enum.reduce("", &(&1 <> &2))
-|>String.reverse()
+|>Enum.reduce("", &(&2 <> &1))
 
 IO.inspect(last)
 IO.inspect(last2)
