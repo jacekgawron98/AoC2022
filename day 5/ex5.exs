@@ -3,25 +3,21 @@ data = File.stream!("ex5.txt")
 
 storage = Enum.at(data,0)
 |>Enum.map(&(String.replace(&1,"\n","")))
-|>Enum.reverse()
-|>tl()
-|>Enum.map(fn stor ->
-  String.replace(stor, "[", "")
-  |>String.replace("]","")
-  |>String.replace("    "," ")
-  |>String.split(" ")
-end)
+|>Enum.map(&String.graphemes/1)
 |>List.zip
 |>Enum.map(&Tuple.to_list/1)
-|>Enum.map(fn e ->
-  Enum.filter(e, fn elem -> !String.equivalent?(elem, "")  end)
+|>Enum.filter(fn e -> !Enum.all?(e, fn s -> String.equivalent?(s, " ") end) end)
+|>Enum.filter(fn e -> !Enum.any?(e, fn s -> String.equivalent?(s, "]") or String.equivalent?(s, "[") end) end)
+|>Enum.map(fn e -> Enum.take(e,length(e)-1)
+  |>Enum.reverse()
+  |>Enum.filter(fn elem -> !String.equivalent?(elem, " ")  end)
 end)
 
 moves = Enum.at(data,2)
 |>Enum.map(&String.trim/1)
 |>Enum.map(fn move ->
-  [_ | tail] = String.split(move, ["move "," from ", " to "])
-  tail
+  String.split(move, ["move "," from ", " to "])
+  |>tl()
   |>Enum.map(&Integer.parse/1)
   |>Enum.map(&(elem(&1,0)))
 end)
