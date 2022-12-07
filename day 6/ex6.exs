@@ -3,16 +3,13 @@ defmodule Ex6 do
     elem(File.read("ex6.txt"),1)
     |>String.graphemes()
     |>(fn list -> Enum.with_index(list)
-      |>Enum.reduce_while("",
-      fn {s,index},acc ->
+      |>Enum.reduce_while("", fn {_,index},_ ->
         res = Enum.slice(list,index,len)
         |>Enum.uniq()
-        |>(&(
-          cond do
-            length(&1) == len -> {:halt, index + len}
-            true -> {:cont, ""}
-          end
-        )).()
+        cond do
+          length(res) == len -> {:halt, index + len}
+          true -> {:cont, ""}
+        end
       end)
     end).()
   end
