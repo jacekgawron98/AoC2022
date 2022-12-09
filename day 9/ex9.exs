@@ -1,66 +1,53 @@
 defmodule Ex9 do
-  def calculate_tail_position(hx,hy,tx,ty,0,_,_) do
-    {hx,hy,tx,ty,[]}
-  end
-
-  def move_many(moves,move) do
-    {x,y} = case move do
-      "R" -> {1,0}
-      "L" -> {-1,0}
-      "U" -> {0,1}
-      "D" -> {0,-1}
-    end
-    Enum.reduce(move, )
-  end
-
-  def calculate_tail_position(hx,hy,tx,ty,count,move,len \\ 1) do
-    {x,y} = case move do
-      "R" -> {1,0}
-      "L" -> {-1,0}
-      "U" -> {0,1}
-      "D" -> {0,-1}
-    end
+  def make_move({hx,hy},{tx,ty}) do
+    {dx,dy} = {hx-tx,hy-ty}
+    sign_x = if hx > tx, do: 1, else: -1
+    sign_y = if hy > ty, do: 1, else: -1
     {ntx,nty} = cond do
-      abs(hx+x - tx) > len and hy+y != ty -> {tx+x, hy+y}
-      abs(hy+y - ty) > len and hx+x != tx -> {hx+x, ty+y}
-      abs(hx+x - tx) > len -> {tx+x, ty}
-      abs(hy+y - ty) > len -> {tx, ty+y}
+      abs(dx) > 1 and abs(dy) > 1 -> {hx-sign_x, hy-sign_y}
+      abs(dx) > 1 -> {hx-sign_x, hy}
+      abs(dy) > 1 -> {hx, hy-sign_y}
       true -> {tx,ty}
     end
-    IO.inspect(hx+x)
-    IO.inspect(hy+y)
-    IO.inspect(ntx)
-    IO.inspect(nty)
-    IO.inspect("=======")
-    {nhx,nhy,nx,ny,moves} = calculate_tail_position(hx+x,hy+y,ntx,nty,count-1,move,len)
-    {nhx,nhy,nx,ny,[{nty,ntx}] ++ moves}
+    {ntx,nty}
   end
 end
-data = File.stream!("ex9t.txt")
+
+start_data = [{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}]
+
+{_,_,t0_all,t8_all} = File.stream!("ex9.txt")
 |>Enum.map(&String.trim/1)
 |>Enum.map(&String.split/1)
 |>Enum.map(fn [move,count] ->
   {val, _} = Integer.parse(count)
   {move,val}
 end)
-
-#res = Enum.reduce(data, {0,0,0,0,[{0,0}]}, fn {move,count},{hx,hy,tx,ty,visited} ->
-#  {nhx,nhy,nx,ny,moves} = Ex9.calculate_tail_position(hx,hy,tx,ty,count,move)
-#  {nhx,nhy,nx,ny,visited ++ moves}
-#end)
-#|>elem(4)
-#|>Enum.uniq()
-#|>length()
-res2 = [{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}]
-|>Enum.with_index()
-|>Enum.reduce_while()
-res2 = Enum.reduce(data, {0,0,0,0,[{0,0}]}, fn {move,count},{hx,hy,tx,ty,visited} ->
-  {nhx,nhy,nx,ny,moves} = Ex9.calculate_tail_position(hx,hy,tx,ty,count,move,10)
-  {nhx,nhy,nx,ny,visited ++ moves}
+|>Enum.reduce({{0,0},start_data,[{0,0}],[{0,0}]}, fn {move,count}, {{hx,hy},tails,short,long} ->
+  {x,y} = case move do
+    "R" -> {1,0}
+    "L" -> {-1,0}
+    "U" -> {0,1}
+    "D" -> {0,-1}
+  end
+  {_, all_t, ts, tl} = Enum.reduce(1..count,{{hx,hy},tails,[],[]}, fn _, {{x1,y1},a,s,l} ->
+    {nhx,nhy} = {x1+x,y1+y}
+    a = List.update_at(a,0,&(Ex9.make_move({nhx,nhy},&1)))
+    r = Enum.reduce(1..8,a, fn i,acc ->
+      acc = List.update_at(acc,i,&(Ex9.make_move(Enum.at(acc,i-1),&1)))
+      acc
+    end)
+    t0 = Enum.at(a,0)
+    t8 = Enum.at(a,8)
+    {{nhx,nhy},r, s ++ [t0], l ++ [t8] }
+  end)
+  {{hx + x*count,hy + y*count},all_t,short ++ ts, long ++ tl}
 end)
-|>elem(4)
-#|>Enum.uniq()
-#|>length()
 
-#IO.inspect(res)
+res1 = Enum.uniq(t0_all)
+|>length()
+
+res2 = Enum.uniq(t8_all)
+|>length()
+
+IO.inspect(res1)
 IO.inspect(res2)
