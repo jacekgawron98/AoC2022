@@ -88,5 +88,5 @@ solution2 = Enum.reduce(1..10000,data,fn _,acc ->
 end)
 |>Ex11.get_product()
 
-IO.inspect(solution1, charlists: :as_lists)
-IO.inspect(solution2, charlists: :as_lists)
+IO.inspect(solution1)
+IO.inspect(solution2)
