@@ -1,6 +1,7 @@
 defmodule Ex13 do
   def compare_packets([packet1, packet2]) do
-    result = Enum.with_index(packet1)
+    result = packet1
+    |>Enum.with_index()
     |>Enum.reduce_while(true, fn {left_elem,index},_ ->
       right_elem = Enum.at(packet2,index)
       cond do
@@ -40,7 +41,8 @@ data = elem(File.read("ex13.txt"),1)
   end)
 end)
 
-solution1 = Enum.map(data,fn packets ->
+solution1 = data
+|>Enum.map(fn packets ->
   Ex13.compare_packets(packets)
 end)
 |>Enum.with_index(1)
@@ -48,8 +50,9 @@ end)
 |>Enum.map(fn {_,index} -> index end)
 |>Enum.sum()
 
-solution2_data = List.foldl(data, [], fn packets, acc -> acc ++ packets end)
-|>(&(&1 ++ [[[2]],[[6]]])).()
+solution2_data = data
+|>List.foldl([], fn packets, acc -> acc ++ packets end)
+|>Kernel.++([[[2]],[[6]]])
 |>Enum.sort(fn p1,p2 -> Ex13.compare_packets([p1,p2]) end)
 div1 = Enum.find_index(solution2_data, fn d -> d == [[2]] end) + 1
 div2 = Enum.find_index(solution2_data, fn d -> d == [[6]] end) + 1
