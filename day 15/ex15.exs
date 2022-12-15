@@ -14,9 +14,7 @@ defmodule Ex15 do
     left_side = (max_distance - abs(p2 - position))
     cond do
       left_side < 0 -> []
-      true -> range_left = -(left_side - p1)
-        range_right = left_side + p1
-        [range_left,range_right]
+      true -> [-(left_side - p1),left_side + p1]
         |>Enum.sort()
     end
   end
@@ -25,8 +23,7 @@ defmodule Ex15 do
     data
     |>Enum.reduce([], fn [p1,p2,q1,q2],acc ->
       max_distance = calculate_distance([p1,p2,q1,q2])
-      dat = get_sensor_coverage_at_position({p1,p2},max_distance,y)
-      case dat do
+      case get_sensor_coverage_at_position({p1,p2},max_distance,y) do
         [] -> acc
         res -> acc ++ [res]
       end
@@ -34,7 +31,7 @@ defmodule Ex15 do
     |>Enum.sort()
   end
 
-  def try_merge(ranges) do
+  def merge_ranges(ranges) do
     ranges
     |>Enum.with_index()
     |>Enum.reduce([[0,0]], fn {[min,max],i},acc ->
@@ -64,7 +61,7 @@ y = 2000000
 beacons_at_y = Ex15.get_beacons_at_position(y,data)
 
 ranges = Ex15.get_ranges(y,data)
-|>Ex15.try_merge()
+|>Ex15.merge_ranges()
 
 diff = ranges
 |>Enum.map(fn [min,max] ->
@@ -76,7 +73,6 @@ diff = ranges
   end)
 end)
 |>Enum.at(0)
-
 ranges_sum = ranges
 |>Enum.map(fn [min,max] -> max-min+1 end)
 |>Enum.at(0)
@@ -89,16 +85,9 @@ solution2 = 0..4000000
   |>Enum.map(fn [min,max] ->
     [max(0,min),min(4000000,max)]
   end)
-  res = Ex15.try_merge(new_ranges)
-  cond do
-    length(res) == 1 -> {:cont, []}
-    true -> {:halt, res
-      |>Enum.at(0)
-      |>Enum.at(1)
-      |>Kernel.+(1)
-      |>Kernel.*(4000000)
-      |>Kernel.+(new_y)
-    }
+  case Ex15.merge_ranges(new_ranges) do
+    res when length(res) == 1 -> {:cont, []}
+    [[_,data]|_] -> {:halt, (data + 1)*4000000 + new_y}
   end
 end)
 
