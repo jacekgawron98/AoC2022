@@ -64,16 +64,24 @@ y = 2000000
 beacons_at_y = Ex15.get_beacons_at_position(y,data)
 
 ranges = Ex15.get_ranges(y,data)
+|>Ex15.try_merge()
 
-solution1 = ranges
+diff = ranges
 |>Enum.map(fn [min,max] ->
-  Enum.to_list(min..max)
+  Enum.reduce(beacons_at_y,0, fn q,acc ->
+    cond do
+      q < max and q > min -> acc + 1
+      true -> acc
+    end
+  end)
 end)
-|>List.flatten()
-|>Enum.uniq()
-|>Kernel.--(beacons_at_y)
-|>length()
+|>Enum.at(0)
 
+ranges_sum = ranges
+|>Enum.map(fn [min,max] -> max-min+1 end)
+|>Enum.at(0)
+
+solution1 = ranges_sum - diff
 
 solution2 = 0..4000000
 |>Enum.reduce_while([],fn new_y,_ ->
