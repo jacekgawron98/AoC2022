@@ -1,19 +1,15 @@
 defmodule Ex6 do
-  def detect_distinct(len \\ 4) do
-    elem(File.read("ex6.txt"),1)
-    |>String.graphemes()
-    |>(fn list -> Enum.with_index(list)
-      |>Enum.reduce_while("", fn {_,index},_ ->
-        res = Enum.slice(list,index,len)
-        |>Enum.uniq()
-        cond do
-          length(res) == len -> {:halt, index + len}
-          true -> {:cont, ""}
-        end
-      end)
-    end).()
+  def detect_distinct1(data, index, len \\ 4) do
+    res = Enum.slice(data,index,len)
+    |>Enum.uniq()
+    cond do
+      length(res) == len -> index + len
+      true -> detect_distinct1(data, index+1, len)
+    end
   end
 end
 
-IO.inspect(Ex6.detect_distinct())
-IO.inspect(Ex6.detect_distinct(14))
+data = elem(File.read("ex6.txt"),1)
+|>String.graphemes()
+IO.inspect(Ex6.detect_distinct1(data,0))
+IO.inspect(Ex6.detect_distinct1(data,0,14))
